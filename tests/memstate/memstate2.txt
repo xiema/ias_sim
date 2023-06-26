@@ -9,15 +9,15 @@
 007        00 000 00 3E8 #C offset
 008        01 3E8 05 BB8 #end state (+1)
 
-Description:
-Starts adding A(1000) and B(1000) at addr 7CF (1999) and BB7 (2999) storing
-the sum at C(1000) addr F9F (3999).
-Then it modifies the instructions for the next iteration. It loads instr 1
-and 2 from 000 and decrements their addresses by 1, then placing them back.
-Then it adds the offset from B to C and modifies the address for instr 3.
-It then subtracts the expected "ending state" of the AC, pre-defined on
-mem location 008. This value is computed such that subtracting it from the
-AC will always yield a nonnegative value until after the last iteration.
+# Description:
+# Starts adding A(1000) and B(1000) at addr 7CF (1999) and BB7 (2999) storing
+# the sum at C(1000) addr F9F (3999).
+# Then it modifies the instructions for the next iteration. It loads instr 1
+# and 2 from 000 and decrements their addresses by 1, then placing them back.
+# Then it adds the offset from B to C and modifies the address for instr 3.
+# It then subtracts the expected "ending state" of the AC, pre-defined on
+# mem location 008. This value is computed such that subtracting it from the
+# AC will always yield a nonnegative value until after the last iteration.
 
 
 0C8 06 3FA F0 EF8

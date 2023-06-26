@@ -37,6 +37,6 @@ for i in range(100):
     ans.append((a + b) % pow2[40])
     translated[200+i] = a
     translated[300+i] = b
-with open("memmap2.txt", 'w') as f:
+with open("memstate2.txt", 'w') as f:
     for i, v in translated.items():
         f.write(fmt(i, v))

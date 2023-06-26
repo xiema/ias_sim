@@ -42,21 +42,44 @@ for instrdef in filter(lambda x: len(x) > 0, INSTRUCTION_DEFS.split('\n')):
         desc['type'], int(desc['opcode'], 2), desc['symbol'])
     symbol_to_opcode[desc['symbol']] = desc['opcode']
 
-
-def parse_bin(instr):
+def parse_memstate(instr):
     """
-    Parses binary shorthand to a list of ints
+    Parses a memory state to a list of ints
     """
     if type(instr) is not list:
-        instr = [ln.strip()
-                 for ln in filter(lambda x: len(x) > 0, instr.splitlines())]
+        instr = [ln.strip().split("#")[0] for ln in instr.splitlines()]
+        instr = list(filter(lambda x: len(x) > 0, instr))
+    translated = {}
+    for ln in instr:
+        ln = ln.replace('\t', ' ')
+        syms = ln.split()
+        val = 0
+        if len(syms) == 2:
+            addr = int(syms[0], 16)
+            val = int(syms[1], 16)
+        elif len(syms) == 5:
+            addr = int(syms[0], 16)
+            val = int(syms[1], 16) + int(syms[2], 16) * pow2[8] + \
+                int(syms[3], 16) * pow2[20] + int(syms[4], 16) * pow2[28]
+        else:
+            raise SyntaxError(ln)
+        translated[addr] = val
+    return translated
+
+def parse_memmap(instr):
+    """
+    Parses a memory map to a list of ints
+    """
+    if type(instr) is not list:
+        instr = [ln.strip().split("#")[0] for ln in instr.splitlines()]
+        instr = list(filter(lambda x: len(x) > 0, instr))
     translated = {}
     i = 0
     for ln in instr:
         if ln.startswith('='):
             i = int(ln[1:])
             continue
-        syms = ln.split(' ')
+        syms = ln.split()
         val = 0
         if len(syms) == 1:
             val = toint(syms[0])

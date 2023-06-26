@@ -19,9 +19,9 @@ fns = filter(lambda fn: fn.startswith("tests_") and fn.endswith(".py"), fns)
 for fn in fns:
     mod = importlib.import_module(os.path.splitext(fn)[0])
     tests = get_tests(mod)
-    print(f"Running test module {mod.__name__.lstrip('tests_')}")
+    print(f"Running test module {mod.__name__[6:]}")
     for test_name, test_fn in tests:
-        print(f" > Running test '{test_name}'... ", end="")
+        print(f" > Running test '{test_name}'...", end=" ")
         test_fn()
         print("Success")
 

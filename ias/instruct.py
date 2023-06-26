@@ -6,88 +6,43 @@ from .utils import *
 
 INSTRUCTION_DEFS = """
 Data transfer            00001010        LOAD MQ
-Data transfer            00001001        LOAD MQ,M(X)
-Data transfer            00100001        STOR M(X)
-Data transfer            00000001        LOAD M(X)
-Data transfer            00000010        LOAD -M(X)
-Data transfer            00000011        LOAD |M(X)|
-Data transfer            00000100        LOAD -|M(X)|
-Unconditional branch     00001101        JUMP M(X,0:19)
-Unconditional branch     00001110        JUMP M(X,20:39)
-Conditional branch       00001111        JUMP + M(X,0:19)
-Conditional branch       00010000        JUMP + M(X,20:39)
-Arithmetic               00000101        ADD M(X)
-Arithmetic               00000111        ADD |M(X)|
-Arithmetic               00000110        SUB M(X)
-Arithmetic               00001000        SUB |M(X)|
-Arithmetic               00001011        MUL M(X)
-Arithmetic               00001100        DIV M(X)
+Data transfer            00001001        LOAD MQ,M({})
+Data transfer            00100001        STOR M({})
+Data transfer            00000001        LOAD M({})
+Data transfer            00000010        LOAD -M({})
+Data transfer            00000011        LOAD |M({})|
+Data transfer            00000100        LOAD -|M({})|
+Unconditional branch     00001101        JUMP M({},0:19)
+Unconditional branch     00001110        JUMP M({},20:39)
+Conditional branch       00001111        JUMP + M({},0:19)
+Conditional branch       00010000        JUMP + M({},20:39)
+Arithmetic               00000101        ADD M({})
+Arithmetic               00000111        ADD |M({})|
+Arithmetic               00000110        SUB M({})
+Arithmetic               00001000        SUB |M({})|
+Arithmetic               00001011        MUL M({})
+Arithmetic               00001100        DIV M({})
 Arithmetic               00010100        LSH
 Arithmetic               00010101        RSH
-Address modify           00010010        STOR M(X,8:19)
-Address modify           00010011        STOR M(X,28:39)
+Address modify           00010010        STOR M({},8:19)
+Address modify           00010011        STOR M({},28:39)
 Exit                     00000000        EXIT
 """
 
-INST_PATTERN = r"^(?P<type>.*?)\s*(?P<opcode>\d{8})\s*(?P<symbol>.*?)$"
+INST_PATTERN = r"^[ \t]*(?P<type>.*?)[ \t]+(?P<opcode>\d{8})[ \t]+(?P<symbol>.*?)[ \t]*$"
 
-Instruction = namedtuple('Instruction', ['type', 'opcode', 'symbol'])
+Instruction = namedtuple('Instruction', ['type', 'opcode', 'symbol', 'format', 'pattern'])
 
 
 instruction_info = {}
 symbol_to_opcode = {}
 for instrdef in filter(lambda x: len(x) > 0, INSTRUCTION_DEFS.split('\n')):
     desc = re.search(INST_PATTERN, instrdef.strip())
+    if desc is None:
+        continue
     instruction_info[desc['opcode']] = Instruction(
-        desc['type'], int(desc['opcode'], 2), desc['symbol'])
+        desc['type'], int(desc['opcode'], 2),
+        desc['symbol'].format('X'), desc['symbol'],
+        re.compile(re.escape(desc['symbol']).replace('\\{\\}', '(\\d+)') + "$")
+    )
     symbol_to_opcode[desc['symbol']] = desc['opcode']
-
-def parse_memstate(instr):
-    """
-    Parses a memory state to a list of ints
-    """
-    if type(instr) is not list:
-        instr = [ln.strip().split("#")[0] for ln in instr.splitlines()]
-        instr = list(filter(lambda x: len(x) > 0, instr))
-    translated = {}
-    for ln in instr:
-        ln = ln.replace('\t', ' ')
-        syms = ln.split()
-        val = 0
-        if len(syms) == 2:
-            addr = int(syms[0], 16)
-            val = int(syms[1], 16)
-        elif len(syms) == 5:
-            addr = int(syms[0], 16)
-            val = int(syms[1], 16) + int(syms[2], 16) * pow2[8] + \
-                int(syms[3], 16) * pow2[20] + int(syms[4], 16) * pow2[28]
-        else:
-            raise SyntaxError(ln)
-        translated[addr] = val
-    return translated
-
-def parse_memmap(instr):
-    """
-    Parses a memory map to a list of ints
-    """
-    if type(instr) is not list:
-        instr = [ln.strip().split("#")[0] for ln in instr.splitlines()]
-        instr = list(filter(lambda x: len(x) > 0, instr))
-    translated = {}
-    i = 0
-    for ln in instr:
-        if ln.startswith('='):
-            i = int(ln[1:])
-            continue
-        syms = ln.split()
-        val = 0
-        if len(syms) == 1:
-            val = toint(syms[0])
-        elif len(syms) == 4:
-            val = toint(syms[0]) + toint(syms[1]) * pow2[8] + \
-                toint(syms[2]) * pow2[20] + toint(syms[3]) * pow2[28]
-        else:
-            raise SyntaxError(ln)
-        translated[i] = val
-        i += 1
-    return translated

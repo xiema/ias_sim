@@ -1,10 +1,8 @@
 from itertools import islice
+import re
 
-pow2 = []
-k = 1
-for _ in range(41):
-    pow2.append(k)
-    k *= 2
+
+pow2 = [1 << k for k in range(41)]
 
 
 def binstr(n, width, reverse=False):
@@ -15,12 +13,10 @@ def binstr(n, width, reverse=False):
     return bs[-1::-1] if reverse else bs
 
 
-def binslice(n, width, first=None, last=None):
-    """"
+def binslice(n, width, first=0, last=None):
+    """
     returns the int value of a slice of the binary representation of an int
     """
-    if first is None:
-        first = 0
     if last is None:
         last = width - 1
 
@@ -28,16 +24,14 @@ def binslice(n, width, first=None, last=None):
     first %= width
     last %= width
 
-    return (n % pow2[last+1]) // pow2[first]
+    return (n >> first) % pow2[last - first + 1]
 
 
-def binsplice(n, m, width, first=None, last=None):
+def binsplice(n, m, width, first=0, last=None):
     """
     returns the int value after splicing in the bits of m into a position in n
     extra trailing bits from m are discarded
     """
-    if first is None:
-        first = 0
     if last is None:
         last = width - 1
 
@@ -46,7 +40,7 @@ def binsplice(n, m, width, first=None, last=None):
     first %= width
     last %= width
 
-    return (n % pow2[first]) + (m * pow2[first]) + (n // pow2[last+1] * pow2[last+1])
+    return (n % pow2[first]) + (m << first) + (n & ~ (pow2[last+1] - 1))
 
 
 def pairs(iterable):
@@ -61,3 +55,12 @@ def toint(s):
     if s.startswith('0x'):
         return int(s, 16)
     return int(s)
+
+
+def get_lines(s):
+    """
+    separates a string into lines, ignoring empty lines and comments
+    """
+    lines = [ln.strip().split("#")[0] for ln in s.splitlines()]
+    lines = list(filter(lambda x: len(x) > 0, lines))
+    return lines

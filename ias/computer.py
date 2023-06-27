@@ -100,84 +100,90 @@ class Computer:
         elif opcode == 0b00100001:
             self.MEM[self.REG.MAR] = self.REG.AC
         # LOAD M(X)
-        elif opcode == 0b000000001:
+        elif opcode == 0b00000001:
             self.REG.AC = self.MEM[self.REG.MAR]
         # LOAD -M(X)
         elif opcode == 0b00000010:
             self.REG.AC = -self.MEM[self.REG.MAR]
         # LOAD |M(X)|
-        elif opcode == 0b000000011:
+        elif opcode == 0b00000011:
             v = self.MEM[self.REG.MAR]
             if v < pow2[38]:
                 self.REG.AC = v
             else:
                 self.REG.AC = pow2[40] - v
         # LOAD -|M(X)|
-        elif opcode == 0b000000100:
+        elif opcode == 0b00000100:
             v = self.MEM[self.REG.MAR]
             if v < pow2[38]:
                 self.REG.AC = pow2[40] - v
             else:
                 self.REG.AC = v
         # JUMP M(X,0:19)
-        elif opcode == 0b000001101:
+        elif opcode == 0b00001101:
             self.REG.PC = self.REG.MAR
             self.offsetPC, self.nextIBR = False, False
         # JUMP M(X,20:39)
-        elif opcode == 0b000001110:
+        elif opcode == 0b00001110:
             self.REG.PC = self.REG.MAR
             self.offsetPC, self.nextIBR = True, False
         # JUMP + M(X,0:19)
-        elif opcode == 0b000001111:
+        elif opcode == 0b00001111:
             if self.REG.AC < pow2[38]:
                 self.REG.PC = self.REG.MAR
                 self.nextIBR, self.offsetPC = False, False
         # JUMP + M(X,20:39)
-        elif opcode == 0b000010000:
+        elif opcode == 0b00010000:
             if self.REG.AC < pow2[38]:
                 self.REG.PC = self.REG.MAR
                 self.nextIBR, self.offsetPC = False, True
         # ADD M(X)
-        elif opcode == 0b000000101:
+        elif opcode == 0b00000101:
             self.REG.AC = self.REG.AC + self.MEM[self.REG.MAR]
         # ADD |M(X)|
-        elif opcode == 0b000000111:
+        elif opcode == 0b00000111:
             v = self.MEM[self.REG.MAR]
             if v < pow2[38]:
                 self.REG.AC = self.REG.AC + v
             else:
                 self.REG.AC = self.REG.AC + pow2[40] - v
         # SUB M(X)
-        elif opcode == 0b000000110:
+        elif opcode == 0b00000110:
             self.REG.AC = self.REG.AC - self.MEM[self.REG.MAR]
         # SUB |M(X)|
-        elif opcode == 0b000001000:
+        elif opcode == 0b00001000:
             v = self.MEM[self.REG.MAR]
             if v < pow2[38]:
                 self.REG.AC = self.REG.AC - v
             else:
                 self.REG.AC = self.REG.AC - pow2[40] + v
         # MUL M(X)
-        elif opcode == 0b000001011:
+        elif opcode == 0b00001011:
             prod = self.MEM[self.REG.MAR] * self.REG.MQ
             self.REG['AC'] = prod // self.REG.cells['MQ'].uprbound
             self.REG['MQ'] = prod
         # DIV M(X)
-        elif opcode == 0b000001100:
+        elif opcode == 0b00001100:
             self.REG.MQ, self.REG.AC = divmod(
                 self.REG.AC, self.MEM[self.REG.MAR])
         # LSH
-        elif opcode == 0b000010100:
+        elif opcode == 0b00010100:
             self.REG.AC = self.REG.AC << 1
         # RSH
-        elif opcode == 0b000010101:
+        elif opcode == 0b00010101:
             self.REG.AC = self.REG.AC >> 1
         # STOR M(X,8:19)
-        elif opcode == 0b000010010:
+        elif opcode == 0b00010010:
             self.MEM[self.REG.MAR, 8:19] = self.REG['AC', 28:39]
         # STOR M(X,28:39)
-        elif opcode == 0b000010011:
+        elif opcode == 0b00010011:
             self.MEM[self.REG.MAR, 28:39] = self.REG['AC', 28:39]
         # EXIT
-        elif opcode == 0b000000000:
+        elif opcode == 0b11111111:
             self.terminate = True
+        # SKIP
+        elif opcode == 0b10101010:
+            pass
+        # TODO: Handle various errors
+        else:
+            raise Exception(f"PC={self.REG.PC}.{[0,1][self.offsetPC]}")

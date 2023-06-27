@@ -26,7 +26,8 @@ Arithmetic               00010100        LSH
 Arithmetic               00010101        RSH
 Address modify           00010010        STOR M({},8:19)
 Address modify           00010011        STOR M({},28:39)
-Exit                     00000000        EXIT
+Exit                     11111111        EXIT
+Skip                     10101010        SKIP
 """
 
 INST_PATTERN = r"^[ \t]*(?P<type>.*?)[ \t]+(?P<opcode>\d{8})[ \t]+(?P<symbol>.*?)[ \t]*$"
@@ -43,6 +44,6 @@ for instrdef in filter(lambda x: len(x) > 0, INSTRUCTION_DEFS.split('\n')):
     instruction_info[desc['opcode']] = Instruction(
         desc['type'], int(desc['opcode'], 2),
         desc['symbol'].format('X'), desc['symbol'],
-        re.compile(re.escape(desc['symbol']).replace('\\{\\}', '(\\d+)') + "$")
+        re.compile(re.escape(desc['symbol']).replace(r'\{\}', r'(\w+)') + "$")
     )
     symbol_to_opcode[desc['symbol']] = desc['opcode']

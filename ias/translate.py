@@ -6,7 +6,7 @@ def _parse_mem(s):
     syms = s.split()
     val = 0
     if len(syms) == 1:
-        val = toint(syms[0])
+        val = toint(syms[0]) % pow2[40]
     elif len(syms) == 4:
         val = toint(syms[0]) + toint(syms[1]) * pow2[8] + \
             toint(syms[2]) * pow2[20] + toint(syms[3]) * pow2[28]
@@ -68,53 +68,6 @@ def mc_to_asm(code):
         oprnd = binslice(val, 20, 8, 19)
         instr = instruction_info[binstr(op, 8)]
         translated.append(instr.format.format(oprnd))
-
-    return translated
-
-
-def _encode(instr):
-    for info in instruction_info.values():
-        m = info.pattern.match(instr)
-        if m:
-            if m.groups():
-                return info.opcode + (toint(m[1]) << 8)
-            else:
-                return info.opcode
-    else:
-        raise SyntaxError(instr)
-
-
-def asm_to_mc(code):
-    encoded = [_encode(instr) for instr in code]
-    if len(encoded) % 2:
-        encoded.append(0)
-    return [(a + (b << 20)) for a, b in pairs(encoded)]
-
-
-def parse_asm(s):
-    lines = get_lines(s)
-    section = None
-    translated = {}
-    pos, ofs = 0, False
-    for line in lines:
-        if line in ['.text', '.data']:
-            section = line
-            pos, ofs = 0, False
-            continue
-
-        if section == '.text':
-            if ofs:
-                translated[pos] += _encode(line) << 20
-                pos += 1
-            else:
-                translated[pos] = _encode(line)
-            ofs = not ofs
-        elif section == '.data':
-            if line.startswith('='):
-                pos = toint(line[1:])
-                continue
-            translated[pos] = _parse_mem(line)
-            pos += 1
 
     return translated
 

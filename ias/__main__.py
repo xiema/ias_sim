@@ -1,6 +1,7 @@
 import sys
 from .computer import Computer, MAINMEMORY_DEF
-from .translate import parse_snapshot, parse_asm
+from .translate import parse_snapshot
+from .assemble import Assembler
 
 from argparse import ArgumentParser
 
@@ -22,7 +23,8 @@ with open(args.file) as f:
     if args.snapshot:
         code = parse_snapshot(input_str, args.shorthand)
     elif args.asm:
-        code = parse_asm(input_str)
+        assembler = Assembler()
+        code = assembler.parse_asm(input_str)
     
     if code is not None:
         comp.load(code)

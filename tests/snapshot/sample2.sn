@@ -3,7 +3,7 @@
 002        06 006 21 000 #decby 006 store 000
 003        05 007 12 001 #storeaddr 001
 004        06 008 0F 000 #sub 008 nonneg jmp
-005        0D FFF 00 000 #exit
+005        FF 000 AA 000 #exit
 
 006        00 001 00 001 #decrement const
 007        00 000 00 3E8 #C offset

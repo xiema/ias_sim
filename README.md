@@ -13,7 +13,7 @@ Direct mapping of the initial memory for the computer. Each line represents the 
     # OP - opcode of instruction
     # ARG - operand/argument for the instruction
 
-The numbers should be in hexadecimal format using capital letters. Leading zeroes are optional. Line comments can also be added with the `#` symbol.
+The numbers should be in hexadecimal format. Leading zeroes are optional. Line comments can also be added with the `#` symbol.
 
 Memory contents do not have to be in order. Memory locations that are not explicitly defined are left untouched.
 
@@ -46,7 +46,7 @@ The following instructions are available:
 
 | Syntax            | Description
 | ----------------- | -----------
-| LOAD MQ           | Transfer AC to MQ
+| LOAD MQ           | Transfer MQ to AC
 | LOAD MQ,M(X)      | Transfer M(X) to MQ
 | STOR M(X)         | Transfer AC to M(X)
 | LOAD M(X)         | Transfer M(X) to AC
@@ -68,8 +68,25 @@ The following instructions are available:
 | STOR M(X,8:19)    | Replace left address field at M(X) by 12 rightmost bits of AC
 | STOR M(X,28:39)   | Replace right address field at M(X) by 12 rightmost bits of AC
 | EXIT              | End execution
+| SKIP              | Do nothing
 
-For any instruction with an address field `X`, the `X` must be replaced by a binary, decimal or hexadecimal number reprenting a valid memory address.
+For any instruction with an address field `X`, the `X` must be replaced by either a number (binary, decimal or hexadecimal) reprenting a valid memory address, or a symbol defined by the `label:` syntax.
+
+Labels can be used to represent memory addresses defined in the code, automatically replaced upon translation:
+
+    .text
+    my_label:
+    LOAD M(x1) & ADD M(x2)
+    # do other stuff then loop back
+    JUMP M(my_label,0:19) &
+
+    .data
+    x1: 23
+    x2: 98
+
+Labels may be composed of alphanumeric characters and underscores.
+
+Since instructions in IAS architecture come in pairs in the memory the `&` keyword can be used to separate at most two instructions in the same line, so that the alignment of instructions can be explicitly shown. If either the left or right side of the `&` are empty, then that side is automatically replaced with a `SKIP` instruction.
 
 # Usage
 
@@ -92,4 +109,7 @@ Add `--dump` to dump the memory contents to stdout
 
 - [x] Load from memory map
 - [x] Translate assembly <-> machine code
-- [ ] Add assembler shorthand/pseudoinstructions, directives
+- [x] Assembly labels
+- [ ] Assembly shorthand
+- [ ] Assembly pseudoinstructions
+- [ ] Assembly directives

@@ -1,11 +1,12 @@
 import sys
 from .computer import Computer, MAINMEMORY_DEF
-from .translate import parse_memmap, parse_asm
+from .translate import parse_snapshot, parse_asm
 
 from argparse import ArgumentParser
 
 parser = ArgumentParser()
-parser.add_argument("-m", "--memmap", action="store_true")
+parser.add_argument("-s", "--snapshot", action="store_true")
+parser.add_argument("--shorthand", action="store_true")
 parser.add_argument("-a", "--asm", action="store_true")
 parser.add_argument("--dump", action="store_true")
 parser.add_argument("file")
@@ -18,8 +19,8 @@ comp.reset()
 with open(args.file) as f:
     input_str = f.read()
     code = None
-    if args.memmap:
-        code = parse_memmap(input_str)
+    if args.snapshot:
+        code = parse_snapshot(input_str, args.shorthand)
     elif args.asm:
         code = parse_asm(input_str)
     

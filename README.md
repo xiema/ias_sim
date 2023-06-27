@@ -4,32 +4,43 @@ A simple computer simulator that uses the IAS instruction set, programmed in Pyt
 
 # Input Program Language
 
-## Memory Map
+## Memory Snapshot
 
-Direct mapping of the initial memory for the computer. Each line represents the contents of the memory at a specific address. The memory contents are specified as either one or four numbers, each of which may be in decimal, binary or hexadecimal format. Example of contents are:
+Direct mapping of the initial memory for the computer. Each line represents the contents of the memory at a specific address. Each line must be in the following format:
 
-    01 100 05 200
+    ADDR OP ARG OP ARG
+    # ADDR - memory address
+    # OP - opcode of instruction
+    # ARG - operand/argument for the instruction
 
-    0b10 0x1A 0b101 0x1B
+The numbers should be in hexadecimal format using capital letters. Leading zeroes are optional. Line comments can also be added with the `#` symbol.
 
-    5000
+Memory contents do not have to be in order. Memory locations that are not explicitly defined are left untouched.
 
-Optionally, an address can be specified for the following memory content. The address can be specified at the start of the line, or in the previous line:
+### Shorthand
 
+Alternatively, a shorthand can be used for defining a memory snapshot. Addresses, opcodes and operands can be specified in binary, decimal or hexadecimal format. Binary and hexadecimal must be explicitly indicated by prefixing with `0b` and `0x`. Single values can also be used to represent data taking the whole width of the memory location.
+
+Memory address is optional, and can be specified at the start of the line, or in the previous line. If the address for a line is omitted, the line is understood to be the memory location after the one addressed in the previous line.
+
+    # Explicitly set address at 0x12
     0x12 0b101 0xF 0b101 0x1
+    # Next line is understood to be 0x13
+    0b11 0x1 0x0 0x0
     
+    # Can also place the address in the previous line
     =0x12
     0b101 0xF 0b101 0x1
 
-If the address for a line is omitted, the line is understood to be the memory location after the one addressed in the previous line. Memory contents do not have to be in order. Memory locations that are not explicitly defined are left untouched.
-
-Line comments can also be added with the `#` symbol.
+    # Full-width data
+    0x10
+    12345
 
 ## IAS Assembly
 
 IAS instructions translated in a more readable format.
 
-An assembly source program (.asm) is divided into two sections specified by the keywords `.text` and `.data`. `.text` can contain assembler instructions, while `.data` may only contain constants, similar to the memory map format.
+An assembly source program (.asm) is divided into two sections specified by the keywords `.text` and `.data`. `.text` can contain assembler instructions, while `.data` may only contain constants, similar to the snapshot format.
 
 The following instructions are available:
 
@@ -62,10 +73,12 @@ For any instruction with an address field `X`, the `X` must be replaced by a bin
 
 # Usage
 
-Can launch with a memory map:
+Can launch with a memory snapshot, either a direct mapping or in shorthand:
 
     # in repo folder
-    python -m ias -m memmap.txt
+    python -m ias -s mem.sn
+    # shorthand mode
+    python -m ias -s mem_short.sn --shorthand
 
 Or launch with an assembler file:
 

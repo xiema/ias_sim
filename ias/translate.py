@@ -15,44 +15,40 @@ def _parse_mem(s):
     return val
 
 
-def parse_memstate(instr):
+def parse_snapshot(instr, shorthand=False):
     """
-    Parses a memory state to a list of ints
-    """
-    if type(instr) is not list:
-        instr = get_lines(instr)
-    translated = {}
-    for ln in instr:
-        ln = ln.replace('\t', ' ')
-        syms = ln.split()
-        val = 0
-        if len(syms) == 2:
-            addr = int(syms[0], 16)
-            val = int(syms[1], 16)
-        elif len(syms) == 5:
-            addr = int(syms[0], 16)
-            val = int(syms[1], 16) + int(syms[2], 16) * pow2[8] + \
-                int(syms[3], 16) * pow2[20] + int(syms[4], 16) * pow2[28]
-        else:
-            raise SyntaxError(ln)
-        translated[addr] = val
-    return translated
-
-
-def parse_memmap(instr):
-    """
-    Parses a memory map to a list of ints
+    Parses a memory snapshot to a list of ints
     """
     if type(instr) is not list:
         instr = get_lines(instr)
     translated = {}
-    i = 0
-    for ln in instr:
-        if ln.startswith('='):
-            i = int(ln[1:])
-            continue
-        translated[i] = _parse_mem(ln)
-        i += 1
+    if shorthand:
+        if type(instr) is not list:
+            instr = get_lines(instr)
+        translated = {}
+        i = 0
+        for ln in instr:
+            if ln.startswith('='):
+                i = int(ln[1:])
+                continue
+            translated[i] = _parse_mem(ln)
+            i += 1
+    else:
+        for ln in instr:
+            ln = ln.replace('\t', ' ')
+            syms = ln.split()
+            val = 0
+            if len(syms) == 2:
+                addr = int(syms[0], 16)
+                val = int(syms[1], 16)
+            elif len(syms) == 5:
+                addr = int(syms[0], 16)
+                val = int(syms[1], 16) + int(syms[2], 16) * pow2[8] + \
+                    int(syms[3], 16) * pow2[20] + int(syms[4], 16) * pow2[28]
+            else:
+                raise SyntaxError(ln)
+            translated[addr] = val
+
     return translated
 
 
@@ -121,3 +117,22 @@ def parse_asm(s):
             pos += 1
 
     return translated
+
+
+if __name__ == "__main__":
+    from argparse import ArgumentParser
+
+    parser = ArgumentParser()
+    parser.add_argument("-m", "--machinecode", action="store_true")
+    parser.add_argument("-s", "--snapshot", action="store_true")
+    parser.add_argument("-l", "--lines", type=int)
+    parser.add_argument("file")
+    args = parser.parse_args()
+
+    if args.snapshot:
+        with open(args.file) as f:
+            code = parse_snapshot(f.read())
+        n = args.lines or (max(code.keys()) + 1)
+        code = [p[1] for p in sorted(code.items())]
+        asm = mc_to_asm(code[:n])
+        print(asm)

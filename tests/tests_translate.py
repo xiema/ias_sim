@@ -3,10 +3,10 @@ from ias.translate import *
 
 
 def test_simple():
-    code = parse_memmap("""
+    code = parse_snapshot("""
         0x1 1000 0x5 1001
         0x21 1002 0x0 0
-    """)
+    """, True)
     asm = mc_to_asm(code)
     mc = asm_to_mc(asm)
     for i in range(len(code)):

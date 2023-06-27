@@ -11,13 +11,13 @@ def rand(bitwidth):
 def test_simple_addition():
     comp = ias.Computer()
     comp.reset()
-    comp.load(ias.parse_memmap("""
+    comp.load(ias.parse_snapshot("""
         0x1 1000 0x5 1001
         0x21 1002 0x0 0
         =1000
         1000
         20
-    """))
+    """, True))
     comp.run()
     assert (comp.REG.AC == 1020)
     assert (comp.MEM[1002] == 1020)
@@ -28,7 +28,7 @@ def test_array_mult():
     comp = ias.Computer()
     comp.reset()
     ans = []
-    program = ias.parse_memmap("""
+    program = ias.parse_snapshot("""
         0x1 4000 0x5 4001
         0x13 4 0x5 4001
         0x12 5 0x5 4001
@@ -44,7 +44,7 @@ def test_array_mult():
         0x0 0x0 0x0 499
         0x0 0x0 0x0 500
         0x0 0x0 0x0 1
-    """)
+    """, True)
     for i in range(500):
         a, b = rand(40), rand(40)
         ans.append(a*b)
@@ -62,7 +62,7 @@ def test_array_addition():
     comp = ias.Computer()
     comp.reset()
     ans = []
-    program = ias.parse_memmap("""
+    program = ias.parse_snapshot("""
         0x1 4000 0x5 4001
         0x13 3 0x5 4001
         0x12 4 0x5 4001
@@ -76,7 +76,7 @@ def test_array_addition():
         0x0 0x0 0x0 999
         0x0 0x0 0x0 1000
         0x0 0x0 0x0 0x1
-    """)
+    """, True)
     for i in range(1000):
         a, b = rand(40), rand(40)
         ans.append((a + b) % pow2[40])
@@ -95,7 +95,7 @@ def test_array_addition2():
     comp = ias.Computer()
     comp.reset()
     ans = []
-    program = ias.parse_memmap("""
+    program = ias.parse_snapshot("""
         0x1 2999 0x5 3999
         0x21 1999 0x1 0
         0x6 5 0x21 0
@@ -104,7 +104,7 @@ def test_array_addition2():
         0x0 0x1 0x0 0x1
         0x1 2000 0x5 2000
         0x0 0x0 0x0 1000
-    """)
+    """, True)
     for i in range(1000):
         a, b = rand(40), rand(40)
         ans.append((a + b) % pow2[40])
@@ -123,7 +123,7 @@ def test_array_mult2():
     comp = ias.Computer()
     comp.reset()
     ans = []
-    program = ias.parse_memmap("""
+    program = ias.parse_snapshot("""
         0x1 4000 0x5 4001
         0x13 4 0x5 4001
         0x12 5 0x5 4001
@@ -139,7 +139,7 @@ def test_array_mult2():
         0x0 0x0 0x0 499
         0x0 0x0 0x0 500
         0x0 0x0 0x0 1
-    """)
+    """, True)
     for i in range(500):
         a, b = rand(40), rand(40)
         ans.append(a*b)
@@ -157,10 +157,10 @@ def test_array_mult2():
 def test_load_add():
     comp = ias.Computer()
     comp.reset()
-    with open("tests/memmap/simple_add.txt") as f:
-        program = ias.parse_memmap(f.read())
-    with open("tests/memmap/simple_add_result.txt") as f:
-        ans = ias.parse_memmap(f.read())
+    with open("tests/snapshot/simple_add_short.sn") as f:
+        program = ias.parse_snapshot(f.read(), True)
+    with open("tests/snapshot/simple_add_short_result.sn") as f:
+        ans = ias.parse_snapshot(f.read(), True)
     comp.load(program)
     comp.run()
     for i in range(ias.MAINMEMORY_DEF[0]):

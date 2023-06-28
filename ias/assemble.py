@@ -12,7 +12,7 @@ class Assembler():
 
     def _encode(self, instr):
         for info in instruction_info.values():
-            m = info.pattern.match(instr)
+            m = info.alias_pattern.match(instr) or info.pattern.match(instr)
             if m:
                 if m.groups():
                     try:

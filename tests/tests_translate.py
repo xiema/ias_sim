@@ -4,6 +4,10 @@ from ias.assemble import Assembler
 
 
 def test_simple():
+    """
+    Simple test translating back and forth from assembly and machine code.
+    """
+
     assembler = Assembler()
 
     code = parse_snapshot("""
@@ -13,7 +17,10 @@ def test_simple():
     asm = mc_to_asm(code)
     mc = assembler.asm_to_mc(asm)
     for i in range(len(code)):
-        assert code[i] == mc[i]
+        try:
+            assert code[i] == mc[i]
+        except AssertionError as e:
+            raise AssertionError(f"{i}: {code[i]} != {mc[i]}", e)
 
     code = [
         "LOAD MQ", "STOR M(1000)",
@@ -27,6 +34,10 @@ def test_simple():
 
 
 def test_instruction_set():
+    """
+    Test translation back and forth of all instructions
+    """
+    
     x = 1234 << 8
     d = {
         "LOAD MQ": 0b1010,
@@ -72,6 +83,10 @@ def test_instruction_set():
 
 
 def test_load():
+    """
+    Test loading from a .asm file
+    """
+    
     comp = ias.Computer()
     comp.reset()
     with open("tests/asm/simple_add.asm") as f:
@@ -89,6 +104,10 @@ def test_load():
 
 
 def test_arithmetic():
+    """
+    Test arithmetic instructions for correctness
+    """
+
     comp = ias.Computer()
     comp.reset()
     with open("tests/asm/arithmetic.asm") as f:
@@ -105,3 +124,26 @@ def test_arithmetic():
         except AssertionError as e:
             raise AssertionError(
                 f"{i}: {comp.MEM[2000 + i]} != {comp.MEM[3000 + i]}", e)
+
+
+def test_array():
+    """
+    Test array manipulation programs
+    """
+    
+    comp = ias.Computer()
+    comp.reset()
+    with open("tests/asm/array_add.asm") as f:
+        code = f.read()
+    assembler = Assembler()
+    comp.load(assembler.parse_asm(code))
+    comp.run()
+    assert comp.MEM[4095] == 0
+
+    # Manually check stored results
+    for i in range(5):
+        try:
+            assert comp.MEM[3000 + i] == comp.MEM[4000 + i]
+        except AssertionError as e:
+            raise AssertionError(
+                f"{i}: {comp.MEM[3000 + i]} != {comp.MEM[4000 + i]}", e)

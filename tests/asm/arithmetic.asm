@@ -1,3 +1,7 @@
+# Test for correctness of arithmetic functions
+# Correct answers are checked for in-code
+# Computation results are stored for external checking
+
 .text
 
 addition: LOAD M(x1) & ADD M(x2)

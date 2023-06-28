@@ -44,41 +44,42 @@ An assembly source program (.asm) is divided into two sections specified by the 
 
 The following instructions are available:
 
-| Syntax            | Description
-| ----------------- | -----------
-| LOAD MQ           | Transfer MQ to AC
-| LOAD MQ,M(X)      | Transfer M(X) to MQ
-| STOR M(X)         | Transfer AC to M(X)
-| LOAD M(X)         | Transfer M(X) to AC
-| LOAD -M(X)        | Transfer -M(X) to AC
-| LOAD \|M(X)\|     | Transfer absolute value of M(X) to AC
-| LOAD -\|M(X)\|    | Transfer negative absolute value of M(X) to AC
-| JUMP M(X,0:19)    | Take next instruction from left half of M(X)
-| JUMP M(X,20:39)   | Take next instruction from right half of M(X)
-| JUMP + M(X,0:19)  | If AC is nonnegative, take next instruction from left half of M(X)
-| JUMP + M(X,20:39) | If AC is nonnegative, take next instruction from right half of M(X)
-| ADD M(X)          | Add M(X) to AC and store in AC
-| ADD \|M(X)\|      | Add absolute value of M(X) to AC and store in AC
-| SUB M(X)          | Subtract M(X) from AC and store in AC
-| SUB \|M(X)\|      | Subtract absolute value of M(X) and store in AC
-| MUL M(X)          | Multiply M(X) by MQ, store most significant bits in AC and least significant bits in MQ
-| DIV M(X)          | Divide AC by M(X), store quotient in MQ and remainder in AC
-| LSH               | Left shift AC by 1 bit
-| RSH               | Right shift AC by 1 bit
-| STOR M(X,8:19)    | Replace left address field at M(X) by 12 rightmost bits of AC
-| STOR M(X,28:39)   | Replace right address field at M(X) by 12 rightmost bits of AC
-| EXIT              | End execution
-| SKIP              | Do nothing
+| Syntax   | Original symbol   | Description
+| -------- | ----------------- | -----------
+| lm       | LOAD MQ           | Transfer MQ to AC
+| lam x    | LOAD MQ,M(X)      | Transfer M(X) to MQ
+| sa x     | STOR M(X)         | Transfer AC to M(X)
+| la x     | LOAD M(X)         | Transfer M(X) to AC
+| la -x    | LOAD -M(X)        | Transfer -M(X) to AC
+| la \|x   | LOAD \|M(X)\|     | Transfer absolute value of M(X) to AC
+| la -\|x  | LOAD -\|M(X)\|    | Transfer negative absolute value of M(X) to AC
+| jl x     | JUMP M(X,0:19)    | Take next instruction from left half of M(X)
+| jr x     | JUMP M(X,20:39)   | Take next instruction from right half of M(X)
+| bl x     | JUMP + M(X,0:19)  | If AC is nonnegative, take next instruction from left half of M(X)
+| br x     | JUMP + M(X,20:39) | If AC is nonnegative, take next instruction from right half of M(X)
+| add x    | ADD M(X)          | Add M(X) to AC and store in AC
+| add \|x  | ADD \|M(X)\|      | Add absolute value of M(X) to AC and store in AC
+| sub x    | SUB M(X)          | Subtract M(X) from AC and store in AC
+| sub \|x  | SUB \|M(X)\|      | Subtract absolute value of M(X) and store in AC
+| muld x   | MUL M(X)          | Multiply M(X) by MQ, store most significant bits in AC and least significant bits in MQ
+| divd x   | DIV M(X)          | Divide AC by M(X), store quotient in MQ and remainder in AC
+| lsh      | LSH               | Left shift AC by 1 bit
+| rsh      | RSH               | Right shift AC by 1 bit
+| sal x    | STOR M(X,8:19)    | Replace left address field at M(X) by 12 rightmost bits of AC
+| sar x    | STOR M(X,28:39)   | Replace right address field at M(X) by 12 rightmost bits of AC
+| exit     | EXIT              | End execution
+| skip     | SKIP              | Do nothing
 
-For any instruction with an address field `X`, the `X` must be replaced by either a number (binary, decimal or hexadecimal) reprenting a valid memory address, or a symbol defined by the `label:` syntax.
+Either the shorthand syntax or the original symbol may be used. For any instruction with an address field `x` (or `X`), the `x` must be replaced by either a number (binary, decimal or hexadecimal) reprenting a valid memory address, or a symbol defined by the `label:` syntax.
 
 Labels can be used to represent memory addresses defined in the code, automatically replaced upon translation:
 
     .text
     my_label:
-    LOAD M(x1) & ADD M(x2)
-    # do other stuff then loop back
-    JUMP M(my_label,0:19) &
+    la x1 & add x2
+    # do other stuff...
+    # then loop back
+    jl my_label &
 
     .data
     x1: 23
@@ -110,6 +111,6 @@ Add `--dump` to dump the memory contents to stdout
 - [x] Load from memory map
 - [x] Translate assembly <-> machine code
 - [x] Assembly labels
-- [ ] Assembly shorthand
+- [x] Assembly shorthand aliases
 - [ ] Assembly pseudoinstructions
 - [ ] Assembly directives

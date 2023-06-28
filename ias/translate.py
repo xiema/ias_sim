@@ -67,7 +67,7 @@ def mc_to_asm(code):
         op = binslice(val, 20, 0, 7)
         oprnd = binslice(val, 20, 8, 19)
         instr = instruction_info[binstr(op, 8)]
-        translated.append(instr.format.format(oprnd))
+        translated.append(instr.fmt.format(oprnd))
 
     return translated
 

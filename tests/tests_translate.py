@@ -132,10 +132,12 @@ def test_array():
     """
     
     comp = ias.Computer()
+    assembler = Assembler()
+    
+    # Array addition with explicit alignment
     comp.reset()
     with open("tests/asm/array_add.asm") as f:
         code = f.read()
-    assembler = Assembler()
     comp.load(assembler.parse_asm(code))
     comp.run()
     assert comp.MEM[4095] == 0
@@ -147,3 +149,49 @@ def test_array():
         except AssertionError as e:
             raise AssertionError(
                 f"{i}: {comp.MEM[3000 + i]} != {comp.MEM[4000 + i]}", e)
+
+    # Array multiplication with implicit alignment
+    comp.reset()
+    with open("tests/asm/array_mult.asm") as f:
+        code = f.read()
+    comp.load(assembler.parse_asm(code))
+    comp.run()
+    assert comp.MEM[4095] == 0
+
+    # Manually check stored results
+    for i in range(5):
+        try:
+            assert comp.MEM[3000 + i] == comp.MEM[4000 + i]
+        except AssertionError as e:
+            raise AssertionError(
+                f"{i}: {comp.MEM[3000 + i]} != {comp.MEM[4000 + i]}", e)
+
+
+def test_advanced():
+    comp = ias.Computer()
+    assembler = Assembler()
+    
+    comp.reset()
+    with open("tests/asm/fibonacci_series.asm") as f:
+        code = f.read()
+    comp.load(assembler.parse_asm(code))
+    comp.run()
+    assert comp.MEM[4095] == 0
+
+    # Manually check stored results
+    fibs = [0, 1]
+    while len(fibs) < 20:
+        fibs.append(fibs[-1] + fibs[-2])
+    for i in range(len(fibs)):
+        assert fibs[i] == comp.MEM[1000 + i]
+
+    comp.reset()
+    with open("tests/asm/align_test.asm") as f:
+        code = f.read()
+    comp.load(assembler.parse_asm(code))
+    comp.run()
+    try:
+        assert comp.MEM[4095] == 0
+    except AssertionError as e:
+        raise AssertionError(f"status={comp.MEM[4095]}", e)
+

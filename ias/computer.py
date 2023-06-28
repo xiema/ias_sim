@@ -186,4 +186,4 @@ class Computer:
             pass
         # TODO: Handle various errors
         else:
-            raise Exception(f"PC={self.REG.PC}.{[0,1][self.offsetPC]}")
+            raise Exception(f"PC={self.REG.PC}.{[0,1][self.offsetPC]} opcode={opcode}")

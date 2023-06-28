@@ -1,4 +1,5 @@
 # Add the elements of two predefined arrays
+# * uses explicit alignment
 
 
 .text

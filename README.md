@@ -89,6 +89,35 @@ Labels may be composed of alphanumeric characters and underscores.
 
 Since instructions in IAS architecture come in pairs in the memory the `&` keyword can be used to separate at most two instructions in the same line, so that the alignment of instructions can be explicitly shown. If either the left or right side of the `&` are empty, then that side is automatically replaced with a `SKIP` instruction.
 
+Note: when a label is defined on a right-aligned instruction and a `jl` or `bl` instruction is used to jump to it, the label functions the same as if the label were defined on the instruction right before it (the left-aligned instruction on the same memory location).
+
+### Label alignment
+
+Due to the peculiarity of the paired instructions in the IAS architecture, if one wants to address a specific instruction in the program, one needs to know the alignment of the instruction in the memory. To make this easier, the assembler detects the alignments of instructions and can automatically determine the appropriate operation to insert. For example, instead of the `jl` and `jr` operations, one can use the `ja` pseudo-instruction:
+
+    la c1
+    add c2
+    sa a
+
+    start:  # first instruction is right-aligned
+        la x1
+        add x2
+        # do other stuff...
+
+        # this jumps to `sa a`
+        # jl start
+
+        # this correctly jumps to `la x1`
+        ja start
+
+        # this correctly jumps to `la x1`, but requires manually managing the instruction alignment
+        # jr start
+
+This also works with the `ba` pseudo-instruction for the `bl` and `br` instructions, and the `saa` for `sal` and `sar`. Note that these are not available in the original syntax.
+
+Additionally, one can use the `.alignl` or `.alignr` directives to ensure alignment of the next instruction.
+
+
 # Usage
 
 Can launch with a memory snapshot, either a direct mapping or in shorthand:
@@ -114,3 +143,4 @@ Add `--dump` to dump the memory contents to stdout
 - [x] Assembly shorthand aliases
 - [ ] Assembly pseudoinstructions
 - [ ] Assembly directives
+- [ ] UI with memory view and stepping

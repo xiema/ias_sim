@@ -1,0 +1,81 @@
+Instruction
+	init (type, opcode, name, description, func)
+	__call__(*args)
+		self.func(args)
+	
+	
+Memory()
+	data
+	addcell(id, bitwidth)
+		data[id] = MemoryCell(bitwidth)
+	__getitem__(key)
+		return data[key].value
+	__setitem__(key, value)
+		data[key].value = value
+	__getattr__ = __getitem__
+	__setattr__ = __setitem__
+	
+MemoryCell
+	value, maxvalue
+	init(bitwidth)
+		maxvalue = 2**(bitwidth-1)
+	__getitem__(key)
+		return int(binstr(self.value)[key.start:key.stop+1], 2)
+	__setitem__(key, val)
+		if val > self.maxvalue
+			value error
+		oldbin = binstr(self.value)
+		newbin = binstr(val)
+		self.value = int(oldbin[:key.start] + newbin + oldbin[key.stop+1:], 2)
+		
+binstr
+			
+
+Computer
+	init
+		initialize registers, memory
+		offsetPC, nextIBR, terminate
+		parse instruction set
+	
+	load(mem list or dict, reg dict, )
+		if mem is list
+			for i,v in mem
+				set mainmem[i] = v
+		if mem is dict
+			for k,v in mem
+				set mainmem[k] = v
+		for k,v in reg
+			set reg
+		
+	run
+		terminate=false
+		while not terminate:
+			step()
+	
+	step
+		fetch()
+		execute()
+		
+	fetch
+		if next in ibr
+			IR, MAR = IBR[0:7], IBR[8:19]
+			nextIBR = False
+			PC = PC + 1
+		else
+			MAR = PC
+			MBR = M[MAR]
+			if leftInstruction
+				IBR = MBR[20:39]
+				IR = MBR[0:7]
+				MAR = MBR[8:19]
+				nextIBR = True
+			else
+				IR = MBR[20:27]
+				MAR = MBR[28:39]
+				PC = PC + 1
+			leftInstruction = !leftInstruction
+				
+		
+	execute
+		instruction = instructionset[ir]
+		instruction.func(self)
